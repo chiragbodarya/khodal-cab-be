@@ -1,49 +1,94 @@
-# Task Manager Backend 🚀
+# Team Task Tracker API (SDE-II Assignment) 🐳
 
-A structured, clean, and developer-friendly Node.js Express backend using Prisma ORM and PostgreSQL.
-
----
-
-## 🛠️ How to Run the Project (Docker Guide)
-
-Depending on whether you have existing containers or are starting fresh, follow the instructions below:
-
-### Scenario 1: You cleared/deleted your Docker Desktop images & containers (Fresh Run)
-If you deleted the container/image and need to rebuild everything from scratch, run these commands:
-
-1. **Step 1: Build and boot up the containers**
-   ```bash
-   docker compose up --build
-   ```
-   *This downloads PostgreSQL, builds your Node app container, and starts both. Keep this terminal open.*
-
-2. **Step 2: Initialize/Push your database schema (In a NEW terminal window)**
-   ```bash
-   docker compose exec app npx prisma db push
-   ```
-   *This pushes the `Task` table design directly into the Docker PostgreSQL container.*
+This is a production-ready REST API for a team-based task tracker system with role-based access control, security encryptions, Winston logs, Redis caching, and containerized deployment.
 
 ---
 
-### Scenario 2: Images and containers already exist in Docker Desktop
-If you already ran Scenario 1 and just want to start the app again to continue working:
+## 🚀 Setup & Installation (One-Command Start)
 
-1. **Run the start command**
-   ```bash
-   docker compose up
-   ```
-   *Since the image is already built and the database container exists, this starts everything instantly in 2 seconds!*
+You only need **Docker Desktop** installed to start the entire system (including PostgreSQL and Redis).
+
+### 1. Run the system
+In your terminal inside the project directory, run:
+```bash
+docker compose up --build
+```
+*This downloads PostgreSQL, Redis, builds the Node.js application, and boots them up connected under a private network.*
+
+### 2. Generate Database Tables (First-time setup only)
+Open a **new terminal window** in the same directory and execute:
+```bash
+docker compose exec app npx prisma db push
+```
+*This pushes our relational database schema and SDE-II indexes directly into the running PostgreSQL container.*
+
+### 3. Bootstrap your initial Admin User
+To register your very first `ADMIN` user, send a POST request using Postman to:
+* **Endpoint**: `POST http://localhost:9000/api/v1/auth/bootstrap-admin`
+* **Body (JSON)**:
+  ```json
+  {
+    "email": "admin@gmail.com",
+    "password": "secureadminpass",
+    "role": "ADMIN",
+    "organizationName": "Acme Corp"
+  }
+  ```
 
 ---
 
-## 🔑 Database Password Details (Important!)
+## 🔑 Security & Authorization Structure
 
-In your setup, you have **two separate databases** you can use:
+This application enforces strict role-based access control (RBAC) at the middleware level in `src/middlewares/auth.js`:
+* **`ADMIN`**: Full permissions across the organization (creates Projects, Tasks, and registers new Users).
+* **`MANAGER`**: Manages tasks, projects, and assigns members. Cannot manage/register users.
+* **`MEMBER`**: Can only view and update tasks specifically assigned to them.
+* **JWT Refresh Token Rotation (RTR):** Protects against session replay hijacking. The database stores active refresh tokens. When the user requests a new access token, the system validates the refresh token, deletes it, and issues a brand-new rotated pair.
 
-1. **The Docker Container Database (`docker-compose.yml`)**:
-   - The password inside `docker-compose.yml` is `taskpassword123`.
-   - **What is this?** This password is created exclusively for the isolated PostgreSQL database running inside the Docker container. It does NOT touch your computer's local Postgres.
-   
-2. **Your Windows Local Database (`.env` Option A)**:
-   - **What is this?** This is your personal PostgreSQL database (`task-manager-db`) installed directly on your Windows PC.
-   - You must replace `your_password_here` inside the `.env` file with the **actual password** you set up when you installed PostgreSQL on your Windows system.
+---
+
+## ⚡ Caching Strategy & Invalidation
+
+To maintain optimal response times, we implement **Redis caching** in `src/config/redis.js` and `src/controllers/taskController.js`:
+1. **Assignee Caching**: Task lists queried per assignee are cached under the key `tasks:assignee:<assigneeId>`.
+2. **Active Invalidation**: Whenever a Task is created, updated (status, assignee, priority), or deleted, the server identifies the assignee and immediately invalidates their specific cache key. This ensures data is always kept consistent and up-to-date while avoiding stale responses.
+
+---
+
+## 📊 Database Design Decisions & Indexing
+
+To meet high-performance standards, we placed index locks on frequently queried fields in our `Task` model:
+* **`status`**: Critical since task boards fetch cards matching distinct statuses (e.g. `TODO`, `IN_PROGRESS`).
+* **`assigneeId`**: Speeds up user dashboard page loads which fetch tasks specific to the logged-in user.
+* **`due_date`**: Crucial for calculating overdue tasks efficiently during analytics aggregates without triggering costly full-table scans.
+
+---
+
+## 💾 Manual PostgreSQL Table Creation (PGAdmin Option)
+
+If you prefer to create tables manually inside PGAdmin rather than letting Prisma sync it, open the **Query Tool** inside PGAdmin and execute the script found in:
+👉 **[schema.sql](file:///d:/vs%20code/github/task-manager-BE/schema.sql)**
+
+---
+
+## 📡 Server-Sent Events (SSE) Real-Time Streams
+
+To build an event-driven architecture with zero extra dependencies, we leverage native HTTP **Server-Sent Events (SSE)** under:
+* **`GET /api/v1/notifications/stream`** (Protected)
+* Connects a persistent HTTP channel. Users receive instant notifications when:
+  - Their assigned task status is changed.
+  - They are `@mentioned` in task comments (e.g. writing a comment `@john welcome!` immediately pushes an SSE notification to user `john`).
+
+---
+
+## 📈 SDE-II Analytics Aggregate
+
+* **`GET /api/v1/analytics/tasks`** (Admin Only):
+  - Fetches total overdue task counts grouped per user.
+  - Fetches the average completion time (in hours) calculated from completed tasks (`completedAt - createdAt`) using raw SQL aggregates.
+
+---
+
+## 🔮 What I Would Improve Given More Time
+1. **Dynamic Permission Mapping:** Move from simple hardcoded role checks to a database table storing dynamic permissions per role.
+2. **Rate Limiting Whitelist:** Configure dynamic rate-limit thresholds for VIP users vs. public callers.
