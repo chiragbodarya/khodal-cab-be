@@ -1,6 +1,6 @@
 require('dotenv').config();
-const app = require('./app');
-const prisma = require('./config/prisma');
+import app  from './app';
+import prisma  from './config/prisma';
 
 const PORT = process.env.PORT || 9000;
 
@@ -13,7 +13,7 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to start server:', error.message);
     process.exit(1);
   }

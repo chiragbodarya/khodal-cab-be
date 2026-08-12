@@ -1,6 +1,7 @@
-const logger = require('../config/logger');
+import { Request, Response, NextFunction } from 'express';
+import logger  from '../config/logger';
 
-module.exports = (err, req, res, next) => {
+const errorHandler = (err: any, req: any, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500;
   const errorCode = err.errorCode || 'INTERNAL_ERROR';
 
@@ -13,3 +14,5 @@ module.exports = (err, req, res, next) => {
     message: err.message || 'Internal Server Error'
   });
 };
+
+export default errorHandler;

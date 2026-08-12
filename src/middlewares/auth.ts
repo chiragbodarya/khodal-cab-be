@@ -1,11 +1,12 @@
-const jwt = require('jsonwebtoken');
-const prisma = require('../config/prisma');
-const AppError = require('../utils/errors');
+import { Request, Response, NextFunction } from 'express';
+import jwt  from 'jsonwebtoken';
+import prisma  from '../config/prisma';
+import AppError  from '../utils/errors';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey12345';
 
 // Authenticate admin session
-const isAdmin = async (req, res, next) => {
+const isAdmin = async (req: any, res: Response, next: NextFunction) => {
   try {
     let token;
     
@@ -25,7 +26,7 @@ const isAdmin = async (req, res, next) => {
 
     // Fetch admin from DB
     const admin = await prisma.admin.findUnique({
-      where: { id: decoded.adminId }
+      where: { id: (decoded as any).adminId }
     });
 
     if (!admin) {
@@ -36,7 +37,7 @@ const isAdmin = async (req, res, next) => {
     req.admin = admin;
     req.user = admin; // Backwards compatibility if needed
     next();
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
       return next(new AppError('Your session has expired. Please refresh your token.', 401, 'TOKEN_EXPIRED'));
     }
@@ -44,6 +45,6 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   isAdmin
 };

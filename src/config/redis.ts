@@ -1,5 +1,5 @@
-const Redis = require('ioredis');
-const logger = require('./logger');
+import Redis  from 'ioredis';
+import logger  from './logger';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let redisClient = null;
@@ -21,36 +21,36 @@ try {
   logger.warn('Failed to initialize Redis. Running cache in fallback/disabled mode.');
 }
 
-const getCache = async (key) => {
-  if (!redisClient || redisClient.status !== 'ready') return null;
+const getCache = async (key: string) => {
+  if (!redisClient || (redisClient as any).status !== 'ready') return null;
   try {
-    const data = await redisClient.get(key);
+    const data = await (redisClient as any).get(key);
     return data ? JSON.parse(data) : null;
   } catch (error) {
     return null;
   }
 };
 
-const setCache = async (key, value, durationSeconds = 300) => {
-  if (!redisClient || redisClient.status !== 'ready') return;
+const setCache = async (key: string, value: any, durationSeconds = 300) => {
+  if (!redisClient || (redisClient as any).status !== 'ready') return;
   try {
-    await redisClient.set(key, JSON.stringify(value), 'EX', durationSeconds);
+    await (redisClient as any).set(key, JSON.stringify(value), 'EX', durationSeconds);
   } catch (error) {
     // Fail silently in development/fallback
   }
 };
 
-const invalidateCache = async (keyPattern) => {
-  if (!redisClient || redisClient.status !== 'ready') return;
+const invalidateCache = async (keyPattern: string) => {
+  if (!redisClient || (redisClient as any).status !== 'ready') return;
   try {
     // If exact key, delete it.
-    await redisClient.del(keyPattern);
+    await (redisClient as any).del(keyPattern);
   } catch (error) {
     // Fail silently in development/fallback
   }
 };
 
-module.exports = {
+export {
   getCache,
   setCache,
   invalidateCache

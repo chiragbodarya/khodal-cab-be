@@ -1,14 +1,16 @@
-const express = require('express');
+import express  from 'express';
 const router = express.Router();
-const controller = require('./controller');
-const { isAdmin } = require('../../middlewares/auth');
+import controller  from './controller';
+import { isAdmin }  from '../../middlewares/auth';
 
 router.get('/', controller.getBlogs);
 router.get('/:slug', controller.getBlogBySlug);
 
 // Admin-only protected routes
+router.get('/admin/list', isAdmin, controller.getAdminBlogs);
+router.get('/admin/:slug', isAdmin, controller.getAdminBlogBySlug);
 router.post('/', isAdmin, controller.createBlog);
 router.put('/:id', isAdmin, controller.updateBlog);
 router.delete('/:id', isAdmin, controller.deleteBlog);
 
-module.exports = router;
+export default router;

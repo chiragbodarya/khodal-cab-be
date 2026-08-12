@@ -32,36 +32,62 @@ model AdminRefreshToken {
 }
 
 model Vehicle {
-  id           Int          @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   name         String
-  type         String       // Bus, Mini Bus, SUV, etc.
-  capacity     Int
-  features     String[]     // AC, Wifi, Charging Ports, Water Bottle, etc.
-  licensePlate String?
-  images       String[]     // Photo URLs
-  status       String       @default("ACTIVE") // ACTIVE, MAINTENANCE, INACTIVE
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  travelPlans  TravelPlan[]
+  description  String?
+  category     String     // Bus, Mini Bus, SUV, etc.
+  seatCapacity Int
+  features     String[]   // AC, Wifi, Charging Ports, TV, etc.
+  pricePerKm   Float
+  image        String?    // Single image URL
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  cabPlans     CabPlan[]
 }
 
-model TravelPlan {
-  id            Int      @id @default(autoincrement())
-  title         String
-  destination   String
-  origin        String
-  description   String?
-  duration      String   // e.g. "3 Days / 2 Nights"
-  price         Float
-  departureTime DateTime?
-  itinerary     Json?    // Detailed day-by-day plan
-  highlights    String[] // Key attractions
-  images        String[] // Destination photo URLs
-  vehicleId     Int?
-  vehicle       Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-  status        String   @default("ACTIVE") // ACTIVE, FULL, INACTIVE
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model CabPlan {
+  id                 Int      @id @default(autoincrement())
+  packageName        String
+  packageDescription String?
+  days               Int
+  nights             Int
+  tripRoute          String   // e.g. "Munnar - Thekkady - Alleppey"
+  highlights         String[] // Key attractions
+  pricePerPerson     Float
+  withDriver         Boolean  @default(true)
+  driverFoodIncluded Boolean  @default(false)
+  image              String?  // Single image URL
+  vehicleId          Int?
+  vehicle            Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model TourPlan {
+  id                 Int      @id @default(autoincrement())
+  packageName        String
+  packageDescription String?
+  days               Int
+  nights             Int
+  tripRoute          String
+  highlights         String[]
+  pricePerPerson     Float
+  startDate          DateTime?
+  endDate            DateTime?
+  image              String?  // Single image URL
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Gallery {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  category  String   // e.g. "car_photo", "church_photo", "trip_photo"
+  title     String?
+  createdAt DateTime @default(now())
 }
 
 model Blog {
