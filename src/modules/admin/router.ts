@@ -1,9 +1,14 @@
-import express  from 'express';
+import express from 'express';
 const router = express.Router();
-import controller  from './controller';
-import { isAdmin }  from '../../middlewares/auth';
+import controller from './controller';
+import { isAdmin } from '../../middlewares/auth';
 
-// Protect all routes in this router
+// Unprotected routes
+router.post('/auth/login', controller.login);
+router.post('/auth/refresh', controller.refresh);
+router.post('/auth/logout', controller.logout);
+
+// Protect all routes below
 router.use(isAdmin);
 
 router.get('/me', controller.me);
