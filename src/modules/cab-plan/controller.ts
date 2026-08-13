@@ -5,19 +5,49 @@ import { sendResponse } from '../../utils/response';
 
 const getCabPlans = async (req: any, res: Response, next: NextFunction) => {
   try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { search, minPrice, maxPrice, days } = req.query;
     const filter: any = { isActive: true };
 
-    const cabPlans = await prisma.cabPlan.findMany({
-      where: filter,
-      orderBy: { createdAt: 'desc' },
-      include: { vehicle: true }
-    });
+    if (search) {
+      filter.OR = [
+        { packageName: { contains: search, mode: 'insensitive' } },
+        { tripRoute: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+    if (minPrice || maxPrice) {
+      filter.pricePerPerson = {};
+      if (minPrice) filter.pricePerPerson.gte = parseFloat(minPrice as string);
+      if (maxPrice) filter.pricePerPerson.lte = parseFloat(maxPrice as string);
+    }
+    if (days) {
+      filter.days = parseInt(days as string);
+    }
+
+    const [cabPlans, total] = await Promise.all([
+      prisma.cabPlan.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: { vehicle: true }
+      }),
+      prisma.cabPlan.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: cabPlans,
-      meta: { count: cabPlans.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);
@@ -26,21 +56,50 @@ const getCabPlans = async (req: any, res: Response, next: NextFunction) => {
 
 const getAdminCabPlans = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { isActive } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { isActive, search, minPrice, maxPrice, days } = req.query;
     const filter: any = {};
     if (isActive !== undefined) filter.isActive = isActive === 'true';
 
-    const cabPlans = await prisma.cabPlan.findMany({
-      where: filter,
-      orderBy: { createdAt: 'desc' },
-      include: { vehicle: true }
-    });
+    if (search) {
+      filter.OR = [
+        { packageName: { contains: search, mode: 'insensitive' } },
+        { tripRoute: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+    if (minPrice || maxPrice) {
+      filter.pricePerPerson = {};
+      if (minPrice) filter.pricePerPerson.gte = parseFloat(minPrice as string);
+      if (maxPrice) filter.pricePerPerson.lte = parseFloat(maxPrice as string);
+    }
+    if (days) {
+      filter.days = parseInt(days as string);
+    }
+
+    const [cabPlans, total] = await Promise.all([
+      prisma.cabPlan.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: { vehicle: true }
+      }),
+      prisma.cabPlan.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: cabPlans,
-      meta: { count: cabPlans.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);

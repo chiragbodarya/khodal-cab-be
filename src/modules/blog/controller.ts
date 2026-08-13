@@ -15,28 +15,45 @@ const slugify = (text: string) => {
 
 const getBlogs = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { tag } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { tag, search } = req.query;
     const filter: any = { published: true };
 
     if (tag) {
       filter.tags = { has: tag };
     }
+    if (search) {
+      filter.title = { contains: search, mode: 'insensitive' };
+    }
 
-    const blogs = await prisma.blog.findMany({
-      where: filter,
-      include: {
-        admin: {
-          select: { id: true, name: true, email: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+    const [blogs, total] = await Promise.all([
+      prisma.blog.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        include: {
+          admin: {
+            select: { id: true, name: true, email: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.blog.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: blogs,
-      meta: { count: blogs.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);
@@ -45,27 +62,44 @@ const getBlogs = async (req: any, res: Response, next: NextFunction) => {
 
 const getAdminBlogs = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { tag, status } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { tag, status, search } = req.query;
     const filter: any = {};
 
     if (status) filter.published = status === 'published';
     if (tag) filter.tags = { has: tag };
+    if (search) {
+      filter.title = { contains: search, mode: 'insensitive' };
+    }
 
-    const blogs = await prisma.blog.findMany({
-      where: filter,
-      include: {
-        admin: {
-          select: { id: true, name: true, email: true }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+    const [blogs, total] = await Promise.all([
+      prisma.blog.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        include: {
+          admin: {
+            select: { id: true, name: true, email: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.blog.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: blogs,
-      meta: { count: blogs.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);

@@ -5,20 +5,38 @@ import { sendResponse } from '../../utils/response';
 
 const getGalleries = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { category } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { category, search } = req.query;
     const filter: any = {};
     if (category) filter.category = category;
 
-    const galleries = await prisma.gallery.findMany({
-      where: filter,
-      orderBy: { createdAt: 'desc' }
-    });
+    if (search) {
+      filter.title = { contains: search, mode: 'insensitive' };
+    }
+
+    const [galleries, total] = await Promise.all([
+      prisma.gallery.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.gallery.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: galleries,
-      meta: { count: galleries.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);

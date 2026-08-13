@@ -5,20 +5,46 @@ import { sendResponse } from '../../utils/response';
 
 const getVehicles = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { category } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { category, search, minPrice, maxPrice, minSeats } = req.query;
     const filter: any = { isActive: true };
     if (category) filter.category = category;
 
-    const vehicles = await prisma.vehicle.findMany({
-      where: filter,
-      orderBy: { createdAt: 'desc' }
-    });
+    if (search) {
+      filter.name = { contains: search, mode: 'insensitive' };
+    }
+    if (minPrice || maxPrice) {
+      filter.pricePerKm = {};
+      if (minPrice) filter.pricePerKm.gte = parseFloat(minPrice as string);
+      if (maxPrice) filter.pricePerKm.lte = parseFloat(maxPrice as string);
+    }
+    if (minSeats) {
+      filter.seatCapacity = { gte: parseInt(minSeats as string) };
+    }
+
+    const [vehicles, total] = await Promise.all([
+      prisma.vehicle.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.vehicle.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: vehicles,
-      meta: { count: vehicles.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);
@@ -27,21 +53,47 @@ const getVehicles = async (req: any, res: Response, next: NextFunction) => {
 
 const getAdminVehicles = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { isActive, category } = req.query;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const { isActive, category, search, minPrice, maxPrice, minSeats } = req.query;
     const filter: any = {};
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     if (category) filter.category = category;
 
-    const vehicles = await prisma.vehicle.findMany({
-      where: filter,
-      orderBy: { createdAt: 'desc' }
-    });
+    if (search) {
+      filter.name = { contains: search, mode: 'insensitive' };
+    }
+    if (minPrice || maxPrice) {
+      filter.pricePerKm = {};
+      if (minPrice) filter.pricePerKm.gte = parseFloat(minPrice as string);
+      if (maxPrice) filter.pricePerKm.lte = parseFloat(maxPrice as string);
+    }
+    if (minSeats) {
+      filter.seatCapacity = { gte: parseInt(minSeats as string) };
+    }
+
+    const [vehicles, total] = await Promise.all([
+      prisma.vehicle.findMany({
+        where: filter,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.vehicle.count({ where: filter })
+    ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: vehicles,
-      meta: { count: vehicles.length }
+      meta: { 
+        total, 
+        page, 
+        limit, 
+        totalPages: Math.ceil(total / limit) 
+      }
     });
   } catch (error) {
     next(error);

@@ -13,4 +13,10 @@ router.use(isAdmin);
 
 router.get('/me', controller.me);
 
+// Admin Management
+router.get('/', controller.getAdmins);
+router.post('/', controller.createAdmin);
+router.put('/:id/password', controller.changePassword);
+router.delete('/:id', controller.deleteAdmin);
+
 export default router;
