@@ -1,7 +1,7 @@
-import express  from 'express';
+import express from 'express';
 const router = express.Router();
-import controller  from './controller';
-import { isAdmin }  from '../../middlewares/auth';
+import controller from './controller';
+import { isAdmin } from '../../middlewares/auth';
 
 router.get('/', controller.getCabPlans);
 router.get('/:id', controller.getCabPlanById);

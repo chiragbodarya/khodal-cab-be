@@ -1,5 +1,5 @@
-import Redis  from 'ioredis';
-import logger  from './logger';
+import Redis from 'ioredis';
+import logger from './logger';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let redisClient = null;
@@ -14,7 +14,7 @@ try {
     logger.info('Redis cache client connected successfully.');
   });
 
-  redisClient.on('error', (err) => {
+  redisClient.on('error', err => {
     logger.warn('Redis connection failed. Running cache in fallback/disabled mode.');
   });
 } catch (error) {
@@ -50,8 +50,4 @@ const invalidateCache = async (keyPattern: string) => {
   }
 };
 
-export {
-  getCache,
-  setCache,
-  invalidateCache
-};
+export { getCache, setCache, invalidateCache };

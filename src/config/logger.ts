@@ -1,5 +1,5 @@
-import winston  from 'winston';
-import path  from 'path';
+import winston from 'winston';
+import path from 'path';
 
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -13,24 +13,23 @@ const logger = winston.createLogger({
   format: logFormat,
   defaultMeta: { service: 'task-tracker-api' },
   transports: [
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../../logs/error.log'), 
-      level: 'error' 
+    new winston.transports.File({
+      filename: path.join(__dirname, '../../logs/error.log'),
+      level: 'error',
     }),
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../../logs/combined.log') 
+    new winston.transports.File({
+      filename: path.join(__dirname, '../../logs/combined.log'),
     }),
   ],
 });
 
 // If in development mode, log to console as well with nice simple colors
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    ),
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    })
+  );
 }
 
 export default logger;

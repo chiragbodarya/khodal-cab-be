@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import AppError  from '../../utils/errors';
-import prisma  from '../../config/prisma';
+import AppError from '../../utils/errors';
+import prisma from '../../config/prisma';
 import { sendResponse } from '../../utils/response';
 
 const getGalleries = async (req: any, res: Response, next: NextFunction) => {
@@ -22,21 +22,21 @@ const getGalleries = async (req: any, res: Response, next: NextFunction) => {
         where: filter,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.gallery.count({ where: filter })
+      prisma.gallery.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: galleries,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -47,7 +47,7 @@ const getGalleryById = async (req: any, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const gallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
     if (!gallery) {
@@ -57,7 +57,7 @@ const getGalleryById = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      data: gallery
+      data: gallery,
     });
   } catch (error) {
     next(error);
@@ -76,15 +76,15 @@ const createGallery = async (req: any, res: Response, next: NextFunction) => {
       data: {
         imageUrl,
         category,
-        title
-      }
+        title,
+      },
     });
 
     sendResponse({
       res,
       statusCode: 201,
       message: 'Gallery item created successfully.',
-      data: gallery
+      data: gallery,
     });
   } catch (error) {
     next(error);
@@ -108,14 +108,14 @@ const updateGallery = async (req: any, res: Response, next: NextFunction) => {
 
     const gallery = await prisma.gallery.update({
       where: { id: parseInt(id) },
-      data: updatedData
+      data: updatedData,
     });
 
     sendResponse({
       res,
       statusCode: 200,
       message: 'Gallery item updated successfully.',
-      data: gallery
+      data: gallery,
     });
   } catch (error) {
     next(error);
@@ -135,7 +135,7 @@ const deleteGallery = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Gallery item deleted successfully.'
+      message: 'Gallery item deleted successfully.',
     });
   } catch (error) {
     next(error);
@@ -147,6 +147,6 @@ const controller = {
   getGalleryById,
   createGallery,
   updateGallery,
-  deleteGallery
+  deleteGallery,
 };
 export default controller;

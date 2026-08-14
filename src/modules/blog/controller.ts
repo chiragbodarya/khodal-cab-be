@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import AppError  from '../../utils/errors';
-import prisma  from '../../config/prisma';
+import AppError from '../../utils/errors';
+import prisma from '../../config/prisma';
 import { sendResponse } from '../../utils/response';
 
 const slugify = (text: string) => {
@@ -36,24 +36,24 @@ const getBlogs = async (req: any, res: Response, next: NextFunction) => {
         take: limit,
         include: {
           admin: {
-            select: { id: true, name: true, email: true }
-          }
+            select: { id: true, name: true, email: true },
+          },
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.blog.count({ where: filter })
+      prisma.blog.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: blogs,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -82,24 +82,24 @@ const getAdminBlogs = async (req: any, res: Response, next: NextFunction) => {
         take: limit,
         include: {
           admin: {
-            select: { id: true, name: true, email: true }
-          }
+            select: { id: true, name: true, email: true },
+          },
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.blog.count({ where: filter })
+      prisma.blog.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: blogs,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -114,9 +114,9 @@ const getBlogBySlug = async (req: any, res: Response, next: NextFunction) => {
       where: { slug },
       include: {
         admin: {
-          select: { id: true, name: true, email: true }
-        }
-      }
+          select: { id: true, name: true, email: true },
+        },
+      },
     });
 
     if (!blog || !blog.published) {
@@ -126,7 +126,7 @@ const getBlogBySlug = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      data: blog
+      data: blog,
     });
   } catch (error) {
     next(error);
@@ -141,9 +141,9 @@ const getAdminBlogBySlug = async (req: any, res: Response, next: NextFunction) =
       where: { slug },
       include: {
         admin: {
-          select: { id: true, name: true, email: true }
-        }
-      }
+          select: { id: true, name: true, email: true },
+        },
+      },
     });
 
     if (!blog) {
@@ -153,7 +153,7 @@ const getAdminBlogBySlug = async (req: any, res: Response, next: NextFunction) =
     sendResponse({
       res,
       statusCode: 200,
-      data: blog
+      data: blog,
     });
   } catch (error) {
     next(error);
@@ -173,7 +173,9 @@ const createBlog = async (req: any, res: Response, next: NextFunction) => {
 
     const existingBlog = await prisma.blog.findUnique({ where: { slug: finalSlug } });
     if (existingBlog) {
-      return next(new AppError('A blog post with this title or slug already exists.', 400, 'DUPLICATE_SLUG'));
+      return next(
+        new AppError('A blog post with this title or slug already exists.', 400, 'DUPLICATE_SLUG')
+      );
     }
 
     const isPublished = published === true || published === 'true';
@@ -188,15 +190,15 @@ const createBlog = async (req: any, res: Response, next: NextFunction) => {
         tags: Array.isArray(tags) ? tags : [],
         published: isPublished,
         publishedAt: isPublished ? new Date() : null,
-        adminId
-      }
+        adminId,
+      },
     });
 
     sendResponse({
       res,
       statusCode: 201,
       message: 'Blog post created successfully.',
-      data: blog
+      data: blog,
     });
   } catch (error) {
     next(error);
@@ -224,7 +226,9 @@ const updateBlog = async (req: any, res: Response, next: NextFunction) => {
       const finalSlug = slugify(slug);
       const slugCheck = await prisma.blog.findUnique({ where: { slug: finalSlug } });
       if (slugCheck) {
-        return next(new AppError('A blog post with this slug already exists.', 400, 'DUPLICATE_SLUG'));
+        return next(
+          new AppError('A blog post with this slug already exists.', 400, 'DUPLICATE_SLUG')
+        );
       }
       updatedData.slug = finalSlug;
     } else if (title !== undefined && !slug) {
@@ -249,14 +253,14 @@ const updateBlog = async (req: any, res: Response, next: NextFunction) => {
 
     const blog = await prisma.blog.update({
       where: { id: parseInt(id) },
-      data: updatedData
+      data: updatedData,
     });
 
     sendResponse({
       res,
       statusCode: 200,
       message: 'Blog post updated successfully.',
-      data: blog
+      data: blog,
     });
   } catch (error) {
     next(error);
@@ -277,7 +281,7 @@ const deleteBlog = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Blog post deleted successfully.'
+      message: 'Blog post deleted successfully.',
     });
   } catch (error) {
     next(error);
@@ -291,6 +295,6 @@ const controller = {
   getAdminBlogBySlug,
   createBlog,
   updateBlog,
-  deleteBlog
+  deleteBlog,
 };
 export default controller;

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt  from 'jsonwebtoken';
-import prisma  from '../config/prisma';
-import AppError  from '../utils/errors';
+import jwt from 'jsonwebtoken';
+import prisma from '../config/prisma';
+import AppError from '../utils/errors';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey12345';
 
@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey12345';
 const isAdmin = async (req: any, res: Response, next: NextFunction) => {
   try {
     let token;
-    
+
     // Check headers
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
@@ -18,7 +18,9 @@ const isAdmin = async (req: any, res: Response, next: NextFunction) => {
     }
 
     if (!token) {
-      return next(new AppError('You are not logged in. Please log in to get access.', 401, 'UNAUTHORIZED'));
+      return next(
+        new AppError('You are not logged in. Please log in to get access.', 401, 'UNAUTHORIZED')
+      );
     }
 
     // Verify token
@@ -26,11 +28,13 @@ const isAdmin = async (req: any, res: Response, next: NextFunction) => {
 
     // Fetch admin from DB
     const admin = await prisma.admin.findUnique({
-      where: { id: (decoded as any).adminId }
+      where: { id: (decoded as any).adminId },
     });
 
     if (!admin) {
-      return next(new AppError('The admin belonging to this token no longer exists.', 401, 'ADMIN_NOT_FOUND'));
+      return next(
+        new AppError('The admin belonging to this token no longer exists.', 401, 'ADMIN_NOT_FOUND')
+      );
     }
 
     // Attach admin/user to request object
@@ -39,12 +43,12 @@ const isAdmin = async (req: any, res: Response, next: NextFunction) => {
     next();
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
-      return next(new AppError('Your session has expired. Please refresh your token.', 401, 'TOKEN_EXPIRED'));
+      return next(
+        new AppError('Your session has expired. Please refresh your token.', 401, 'TOKEN_EXPIRED')
+      );
     }
     next(new AppError('Invalid token. Access denied.', 401, 'INVALID_TOKEN'));
   }
 };
 
-export {
-  isAdmin
-};
+export { isAdmin };

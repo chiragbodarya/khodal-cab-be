@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import fs  from 'fs';
-import path  from 'path';
-import AppError  from '../../utils/errors';
+import fs from 'fs';
+import path from 'path';
+import AppError from '../../utils/errors';
 import { sendResponse } from '../../utils/response';
 
 const uploadDir = path.join(__dirname, '../../../public/uploads');
@@ -12,18 +12,18 @@ const uploadImage = (req: any, res: Response, next: NextFunction) => {
     if (!req.file) {
       return next(new AppError('No file uploaded.', 400, 'VALIDATION_ERROR'));
     }
-    
+
     // Construct the URL to the uploaded file
     const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    
+
     sendResponse({
       res,
       statusCode: 201,
       message: 'File uploaded successfully.',
       data: {
         url: fileUrl,
-        filename: req.file.filename
-      }
+        filename: req.file.filename,
+      },
     });
   } catch (error) {
     next(error);
@@ -40,14 +40,14 @@ const listImages = (req: any, res: Response, next: NextFunction) => {
     const files = fs.readdirSync(uploadDir);
     const fileList = files.map(filename => ({
       filename,
-      url: `${req.protocol}://${req.get('host')}/uploads/${filename}`
+      url: `${req.protocol}://${req.get('host')}/uploads/${filename}`,
     }));
 
     sendResponse({
       res,
       statusCode: 200,
       data: fileList,
-      meta: { count: fileList.length }
+      meta: { count: fileList.length },
     });
   } catch (error) {
     next(error);
@@ -69,7 +69,7 @@ const deleteImage = (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      message: 'File deleted successfully.'
+      message: 'File deleted successfully.',
     });
   } catch (error) {
     next(error);
@@ -79,6 +79,6 @@ const deleteImage = (req: any, res: Response, next: NextFunction) => {
 const controller = {
   uploadImage,
   listImages,
-  deleteImage
+  deleteImage,
 };
 export default controller;

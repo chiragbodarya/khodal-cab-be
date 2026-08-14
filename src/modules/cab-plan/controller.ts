@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import AppError  from '../../utils/errors';
-import prisma  from '../../config/prisma';
+import AppError from '../../utils/errors';
+import prisma from '../../config/prisma';
 import { sendResponse } from '../../utils/response';
 
 const getCabPlans = async (req: any, res: Response, next: NextFunction) => {
@@ -15,7 +15,7 @@ const getCabPlans = async (req: any, res: Response, next: NextFunction) => {
     if (search) {
       filter.OR = [
         { packageName: { contains: search, mode: 'insensitive' } },
-        { tripRoute: { contains: search, mode: 'insensitive' } }
+        { tripRoute: { contains: search, mode: 'insensitive' } },
       ];
     }
     if (minPrice || maxPrice) {
@@ -33,21 +33,21 @@ const getCabPlans = async (req: any, res: Response, next: NextFunction) => {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { vehicle: true }
+        include: { vehicle: true },
       }),
-      prisma.cabPlan.count({ where: filter })
+      prisma.cabPlan.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: cabPlans,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -67,7 +67,7 @@ const getAdminCabPlans = async (req: any, res: Response, next: NextFunction) => 
     if (search) {
       filter.OR = [
         { packageName: { contains: search, mode: 'insensitive' } },
-        { tripRoute: { contains: search, mode: 'insensitive' } }
+        { tripRoute: { contains: search, mode: 'insensitive' } },
       ];
     }
     if (minPrice || maxPrice) {
@@ -85,21 +85,21 @@ const getAdminCabPlans = async (req: any, res: Response, next: NextFunction) => 
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { vehicle: true }
+        include: { vehicle: true },
       }),
-      prisma.cabPlan.count({ where: filter })
+      prisma.cabPlan.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: cabPlans,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -112,7 +112,7 @@ const getCabPlanById = async (req: any, res: Response, next: NextFunction) => {
 
     const cabPlan = await prisma.cabPlan.findFirst({
       where: { id: parseInt(id), isActive: true },
-      include: { vehicle: true }
+      include: { vehicle: true },
     });
 
     if (!cabPlan) {
@@ -122,7 +122,7 @@ const getCabPlanById = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      data: cabPlan
+      data: cabPlan,
     });
   } catch (error) {
     next(error);
@@ -135,7 +135,7 @@ const getAdminCabPlanById = async (req: any, res: Response, next: NextFunction) 
 
     const cabPlan = await prisma.cabPlan.findUnique({
       where: { id: parseInt(id) },
-      include: { vehicle: true }
+      include: { vehicle: true },
     });
 
     if (!cabPlan) {
@@ -145,7 +145,7 @@ const getAdminCabPlanById = async (req: any, res: Response, next: NextFunction) 
     sendResponse({
       res,
       statusCode: 200,
-      data: cabPlan
+      data: cabPlan,
     });
   } catch (error) {
     next(error);
@@ -154,10 +154,29 @@ const getAdminCabPlanById = async (req: any, res: Response, next: NextFunction) 
 
 const createCabPlan = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { packageName, packageDescription, days, nights, tripRoute, highlights, pricePerPerson, withDriver, driverFoodIncluded, image, vehicleId, isActive } = req.body;
+    const {
+      packageName,
+      packageDescription,
+      days,
+      nights,
+      tripRoute,
+      highlights,
+      pricePerPerson,
+      withDriver,
+      driverFoodIncluded,
+      image,
+      vehicleId,
+      isActive,
+    } = req.body;
 
     if (!packageName || !days || !nights || !tripRoute || pricePerPerson === undefined) {
-      return next(new AppError('Please provide packageName, days, nights, tripRoute, and pricePerPerson.', 400, 'VALIDATION_ERROR'));
+      return next(
+        new AppError(
+          'Please provide packageName, days, nights, tripRoute, and pricePerPerson.',
+          400,
+          'VALIDATION_ERROR'
+        )
+      );
     }
 
     const cabPlan = await prisma.cabPlan.create({
@@ -173,15 +192,15 @@ const createCabPlan = async (req: any, res: Response, next: NextFunction) => {
         driverFoodIncluded: driverFoodIncluded !== undefined ? Boolean(driverFoodIncluded) : false,
         image,
         vehicleId: vehicleId ? parseInt(vehicleId) : null,
-        isActive: isActive !== undefined ? Boolean(isActive) : true
-      }
+        isActive: isActive !== undefined ? Boolean(isActive) : true,
+      },
     });
 
     sendResponse({
       res,
       statusCode: 201,
       message: 'Cab plan created successfully.',
-      data: cabPlan
+      data: cabPlan,
     });
   } catch (error) {
     next(error);
@@ -191,7 +210,20 @@ const createCabPlan = async (req: any, res: Response, next: NextFunction) => {
 const updateCabPlan = async (req: any, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { packageName, packageDescription, days, nights, tripRoute, highlights, pricePerPerson, withDriver, driverFoodIncluded, image, vehicleId, isActive } = req.body;
+    const {
+      packageName,
+      packageDescription,
+      days,
+      nights,
+      tripRoute,
+      highlights,
+      pricePerPerson,
+      withDriver,
+      driverFoodIncluded,
+      image,
+      vehicleId,
+      isActive,
+    } = req.body;
 
     const existing = await prisma.cabPlan.findUnique({ where: { id: parseInt(id) } });
     if (!existing) {
@@ -204,24 +236,26 @@ const updateCabPlan = async (req: any, res: Response, next: NextFunction) => {
     if (days !== undefined) updatedData.days = parseInt(days);
     if (nights !== undefined) updatedData.nights = parseInt(nights);
     if (tripRoute !== undefined) updatedData.tripRoute = tripRoute;
-    if (highlights !== undefined) updatedData.highlights = Array.isArray(highlights) ? highlights : [];
+    if (highlights !== undefined)
+      updatedData.highlights = Array.isArray(highlights) ? highlights : [];
     if (pricePerPerson !== undefined) updatedData.pricePerPerson = parseFloat(pricePerPerson);
     if (withDriver !== undefined) updatedData.withDriver = Boolean(withDriver);
-    if (driverFoodIncluded !== undefined) updatedData.driverFoodIncluded = Boolean(driverFoodIncluded);
+    if (driverFoodIncluded !== undefined)
+      updatedData.driverFoodIncluded = Boolean(driverFoodIncluded);
     if (image !== undefined) updatedData.image = image;
     if (vehicleId !== undefined) updatedData.vehicleId = vehicleId ? parseInt(vehicleId) : null;
     if (isActive !== undefined) updatedData.isActive = Boolean(isActive);
 
     const cabPlan = await prisma.cabPlan.update({
       where: { id: parseInt(id) },
-      data: updatedData
+      data: updatedData,
     });
 
     sendResponse({
       res,
       statusCode: 200,
       message: 'Cab plan updated successfully.',
-      data: cabPlan
+      data: cabPlan,
     });
   } catch (error) {
     next(error);
@@ -241,7 +275,7 @@ const deleteCabPlan = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Cab plan deleted successfully.'
+      message: 'Cab plan deleted successfully.',
     });
   } catch (error) {
     next(error);
@@ -255,6 +289,6 @@ const controller = {
   getAdminCabPlanById,
   createCabPlan,
   updateCabPlan,
-  deleteCabPlan
+  deleteCabPlan,
 };
 export default controller;

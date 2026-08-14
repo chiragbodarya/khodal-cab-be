@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import express  from 'express';
-import cors  from 'cors';
-import helmet  from 'helmet';
-import morgan  from 'morgan';
-import cookieParser  from 'cookie-parser';
-import router  from './routes';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
+import router from './routes';
 
-import errorHandler  from './middlewares/errors';
+import errorHandler from './middlewares/errors';
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Static files for images
-import path  from 'path';
+import path from 'path';
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
 // Base Route

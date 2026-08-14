@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import logger  from '../config/logger';
+import logger from '../config/logger';
 
 const errorHandler = (err: any, req: any, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500;
@@ -11,7 +11,7 @@ const errorHandler = (err: any, req: any, res: Response, next: NextFunction) => 
   res.status(statusCode).json({
     status: statusCode,
     code: errorCode,
-    message: err.message || 'Internal Server Error'
+    message: err.message || 'Internal Server Error',
   });
 };
 

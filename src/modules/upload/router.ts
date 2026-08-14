@@ -1,10 +1,10 @@
-import express  from 'express';
+import express from 'express';
 const router = express.Router();
-import controller  from './controller';
-import { isAdmin }  from '../../middlewares/auth';
-import multer  from 'multer';
-import path  from 'path';
-import crypto  from 'crypto';
+import controller from './controller';
+import { isAdmin } from '../../middlewares/auth';
+import multer from 'multer';
+import path from 'path';
+import crypto from 'crypto';
 
 // Setup multer storage
 const storage = multer.diskStorage({
@@ -15,10 +15,10 @@ const storage = multer.diskStorage({
     const ext = path.extname(file.originalname);
     const filename = `${crypto.randomBytes(16).toString('hex')}${ext}`;
     cb(null, filename);
-  }
+  },
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
@@ -27,7 +27,7 @@ const upload = multer({
     } else {
       cb(new Error('Only image files are allowed.'));
     }
-  }
+  },
 });
 
 // Admin-only protected routes

@@ -30,14 +30,14 @@ const login = async (req: any, res: Response, next: NextFunction) => {
     await prisma.admin.update({
       where: { id: admin.id },
       data: {
-        refreshToken: refreshTokenStr
-      }
+        refreshToken: refreshTokenStr,
+      },
     });
 
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const
+      sameSite: 'strict' as const,
     };
 
     res.cookie('accessToken', accessToken, cookieOptions);
@@ -49,8 +49,8 @@ const login = async (req: any, res: Response, next: NextFunction) => {
       data: {
         accessToken,
         refreshToken: refreshTokenStr,
-        admin: formatAdminResponse(admin)
-      }
+        admin: formatAdminResponse(admin),
+      },
     });
   } catch (error) {
     next(error);
@@ -66,11 +66,13 @@ const refresh = async (req: any, res: Response, next: NextFunction) => {
     }
 
     const admin = await prisma.admin.findFirst({
-      where: { refreshToken: refreshToken }
+      where: { refreshToken: refreshToken },
     });
 
     if (!admin) {
-      return next(new AppError('Invalid refresh token. Please log in again.', 401, 'INVALID_REFRESH_TOKEN'));
+      return next(
+        new AppError('Invalid refresh token. Please log in again.', 401, 'INVALID_REFRESH_TOKEN')
+      );
     }
 
     const newAccessToken = generateAdminAccessToken(admin);
@@ -79,14 +81,14 @@ const refresh = async (req: any, res: Response, next: NextFunction) => {
     await prisma.admin.update({
       where: { id: admin.id },
       data: {
-        refreshToken: newRefreshTokenStr
-      }
+        refreshToken: newRefreshTokenStr,
+      },
     });
 
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const
+      sameSite: 'strict' as const,
     });
 
     sendResponse({
@@ -95,8 +97,8 @@ const refresh = async (req: any, res: Response, next: NextFunction) => {
       message: 'Token refreshed successfully',
       data: {
         accessToken: newAccessToken,
-        refreshToken: newRefreshTokenStr
-      }
+        refreshToken: newRefreshTokenStr,
+      },
     });
   } catch (error) {
     next(error);
@@ -108,17 +110,19 @@ const logout = async (req: any, res: Response, next: NextFunction) => {
     const { refreshToken } = req.body;
 
     if (refreshToken) {
-      await prisma.admin.updateMany({
-        where: { refreshToken: refreshToken },
-        data: { refreshToken: null }
-      }).catch(() => { });
+      await prisma.admin
+        .updateMany({
+          where: { refreshToken: refreshToken },
+          data: { refreshToken: null },
+        })
+        .catch(() => {});
     }
 
     res.clearCookie('accessToken');
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Logged out successfully.'
+      message: 'Logged out successfully.',
     });
   } catch (error) {
     next(error);
@@ -130,7 +134,7 @@ const me = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      data: { admin: formatAdminResponse(req.admin) }
+      data: { admin: formatAdminResponse(req.admin) },
     });
   } catch (error) {
     next(error);
@@ -156,15 +160,15 @@ const createAdmin = async (req: any, res: Response, next: NextFunction) => {
       data: {
         email,
         password: hashedPassword,
-        name
-      }
+        name,
+      },
     });
 
     sendResponse({
       res,
       statusCode: 201,
       message: 'Admin created successfully.',
-      data: formatAdminResponse(admin)
+      data: formatAdminResponse(admin),
     });
   } catch (error) {
     next(error);
@@ -181,9 +185,9 @@ const getAdmins = async (req: any, res: Response, next: NextFunction) => {
       prisma.admin.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.admin.count()
+      prisma.admin.count(),
     ]);
 
     const formattedAdmins = admins.map(admin => formatAdminResponse(admin));
@@ -196,8 +200,8 @@ const getAdmins = async (req: any, res: Response, next: NextFunction) => {
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -210,7 +214,9 @@ const changePassword = async (req: any, res: Response, next: NextFunction) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return next(new AppError('Please provide currentPassword and newPassword.', 400, 'VALIDATION_ERROR'));
+      return next(
+        new AppError('Please provide currentPassword and newPassword.', 400, 'VALIDATION_ERROR')
+      );
     }
 
     const admin = await prisma.admin.findUnique({ where: { id: parseInt(id) } });
@@ -227,13 +233,13 @@ const changePassword = async (req: any, res: Response, next: NextFunction) => {
 
     await prisma.admin.update({
       where: { id: parseInt(id) },
-      data: { password: hashedPassword, refreshToken: null } // invalidate token on password change
+      data: { password: hashedPassword, refreshToken: null }, // invalidate token on password change
     });
 
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Password changed successfully. Please log in again.'
+      message: 'Password changed successfully. Please log in again.',
     });
   } catch (error) {
     next(error);
@@ -259,7 +265,7 @@ const deleteAdmin = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Admin deleted successfully.'
+      message: 'Admin deleted successfully.',
     });
   } catch (error) {
     next(error);
@@ -274,6 +280,6 @@ const controller = {
   createAdmin,
   getAdmins,
   changePassword,
-  deleteAdmin
+  deleteAdmin,
 };
 export default controller;

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import AppError  from '../../utils/errors';
-import prisma  from '../../config/prisma';
+import AppError from '../../utils/errors';
+import prisma from '../../config/prisma';
 import { sendResponse } from '../../utils/response';
 
 const getTourPlans = async (req: any, res: Response, next: NextFunction) => {
@@ -15,7 +15,7 @@ const getTourPlans = async (req: any, res: Response, next: NextFunction) => {
     if (search) {
       filter.OR = [
         { packageName: { contains: search, mode: 'insensitive' } },
-        { tripRoute: { contains: search, mode: 'insensitive' } }
+        { tripRoute: { contains: search, mode: 'insensitive' } },
       ];
     }
     if (minPrice || maxPrice) {
@@ -31,21 +31,21 @@ const getTourPlans = async (req: any, res: Response, next: NextFunction) => {
         where: filter,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.tourPlan.count({ where: filter })
+      prisma.tourPlan.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: tourPlans,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -65,7 +65,7 @@ const getAdminTourPlans = async (req: any, res: Response, next: NextFunction) =>
     if (search) {
       filter.OR = [
         { packageName: { contains: search, mode: 'insensitive' } },
-        { tripRoute: { contains: search, mode: 'insensitive' } }
+        { tripRoute: { contains: search, mode: 'insensitive' } },
       ];
     }
     if (minPrice || maxPrice) {
@@ -81,21 +81,21 @@ const getAdminTourPlans = async (req: any, res: Response, next: NextFunction) =>
         where: filter,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.tourPlan.count({ where: filter })
+      prisma.tourPlan.count({ where: filter }),
     ]);
 
     sendResponse({
       res,
       statusCode: 200,
       data: tourPlans,
-      meta: { 
-        total, 
-        page, 
-        limit, 
-        totalPages: Math.ceil(total / limit) 
-      }
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -108,7 +108,7 @@ const getTourPlanById = async (req: any, res: Response, next: NextFunction) => {
     const filter: any = { id: parseInt(id), isActive: true };
 
     const tourPlan = await prisma.tourPlan.findFirst({
-      where: filter
+      where: filter,
     });
 
     if (!tourPlan) {
@@ -118,7 +118,7 @@ const getTourPlanById = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      data: tourPlan
+      data: tourPlan,
     });
   } catch (error) {
     next(error);
@@ -129,7 +129,7 @@ const getAdminTourPlanById = async (req: any, res: Response, next: NextFunction)
   try {
     const { id } = req.params;
     const tourPlan = await prisma.tourPlan.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
     if (!tourPlan) {
@@ -139,7 +139,7 @@ const getAdminTourPlanById = async (req: any, res: Response, next: NextFunction)
     sendResponse({
       res,
       statusCode: 200,
-      data: tourPlan
+      data: tourPlan,
     });
   } catch (error) {
     next(error);
@@ -148,10 +148,28 @@ const getAdminTourPlanById = async (req: any, res: Response, next: NextFunction)
 
 const createTourPlan = async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { packageName, packageDescription, days, nights, tripRoute, highlights, pricePerPerson, startDate, endDate, image, isActive } = req.body;
+    const {
+      packageName,
+      packageDescription,
+      days,
+      nights,
+      tripRoute,
+      highlights,
+      pricePerPerson,
+      startDate,
+      endDate,
+      image,
+      isActive,
+    } = req.body;
 
     if (!packageName || !days || !nights || !tripRoute || pricePerPerson === undefined) {
-      return next(new AppError('Please provide packageName, days, nights, tripRoute, and pricePerPerson.', 400, 'VALIDATION_ERROR'));
+      return next(
+        new AppError(
+          'Please provide packageName, days, nights, tripRoute, and pricePerPerson.',
+          400,
+          'VALIDATION_ERROR'
+        )
+      );
     }
 
     const tourPlan = await prisma.tourPlan.create({
@@ -166,15 +184,15 @@ const createTourPlan = async (req: any, res: Response, next: NextFunction) => {
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         image,
-        isActive: isActive !== undefined ? Boolean(isActive) : true
-      }
+        isActive: isActive !== undefined ? Boolean(isActive) : true,
+      },
     });
 
     sendResponse({
       res,
       statusCode: 201,
       message: 'Tour plan created successfully.',
-      data: tourPlan
+      data: tourPlan,
     });
   } catch (error) {
     next(error);
@@ -184,7 +202,19 @@ const createTourPlan = async (req: any, res: Response, next: NextFunction) => {
 const updateTourPlan = async (req: any, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { packageName, packageDescription, days, nights, tripRoute, highlights, pricePerPerson, startDate, endDate, image, isActive } = req.body;
+    const {
+      packageName,
+      packageDescription,
+      days,
+      nights,
+      tripRoute,
+      highlights,
+      pricePerPerson,
+      startDate,
+      endDate,
+      image,
+      isActive,
+    } = req.body;
 
     const existing = await prisma.tourPlan.findUnique({ where: { id: parseInt(id) } });
     if (!existing) {
@@ -197,7 +227,8 @@ const updateTourPlan = async (req: any, res: Response, next: NextFunction) => {
     if (days !== undefined) updatedData.days = parseInt(days);
     if (nights !== undefined) updatedData.nights = parseInt(nights);
     if (tripRoute !== undefined) updatedData.tripRoute = tripRoute;
-    if (highlights !== undefined) updatedData.highlights = Array.isArray(highlights) ? highlights : [];
+    if (highlights !== undefined)
+      updatedData.highlights = Array.isArray(highlights) ? highlights : [];
     if (pricePerPerson !== undefined) updatedData.pricePerPerson = parseFloat(pricePerPerson);
     if (startDate !== undefined) updatedData.startDate = startDate ? new Date(startDate) : null;
     if (endDate !== undefined) updatedData.endDate = endDate ? new Date(endDate) : null;
@@ -206,14 +237,14 @@ const updateTourPlan = async (req: any, res: Response, next: NextFunction) => {
 
     const tourPlan = await prisma.tourPlan.update({
       where: { id: parseInt(id) },
-      data: updatedData
+      data: updatedData,
     });
 
     sendResponse({
       res,
       statusCode: 200,
       message: 'Tour plan updated successfully.',
-      data: tourPlan
+      data: tourPlan,
     });
   } catch (error) {
     next(error);
@@ -233,7 +264,7 @@ const deleteTourPlan = async (req: any, res: Response, next: NextFunction) => {
     sendResponse({
       res,
       statusCode: 200,
-      message: 'Tour plan deleted successfully.'
+      message: 'Tour plan deleted successfully.',
     });
   } catch (error) {
     next(error);
@@ -247,6 +278,6 @@ const controller = {
   getAdminTourPlanById,
   createTourPlan,
   updateTourPlan,
-  deleteTourPlan
+  deleteTourPlan,
 };
 export default controller;
