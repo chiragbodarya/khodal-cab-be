@@ -2,9 +2,14 @@
   "name": "task-manager-be",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "npx prettier --write \"src/**/*.{ts,js,json}\" \"*.{json,js,ts}\"",
+    "format:check": "npx prettier --check \"src/**/*.{ts,js,json}\" \"*.{json,js,ts}\""
   },
   "repository": {
     "type": "git",
@@ -19,7 +24,7 @@
   },
   "homepage": "https://github.com/chiragbodarya/task-manager-BE#readme",
   "dependencies": {
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^6.15.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -27,13 +32,26 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
+    "ioredis": "^5.11.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
-    "prisma": "^7.8.0",
+    "multer": "^2.2.0",
+    "prisma": "^6.15.0",
     "winston": "^3.19.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
   }
 }
