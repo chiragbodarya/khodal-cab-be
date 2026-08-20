@@ -9,6 +9,7 @@ import uploadRouter from '../modules/upload/router';
 import cabPlanRouter from '../modules/cab-plan/router';
 import tourPlanRouter from '../modules/tour-plan/router';
 import galleryRouter from '../modules/gallery/router';
+import inquiryRouter from '../modules/inquiry/router';
 
 router.get('/health', (req: any, res: Response) => {
   res.json({ status: 'ok', message: 'API is working fine' });
@@ -21,5 +22,6 @@ router.use('/tour-plans', tourPlanRouter);
 router.use('/gallery', galleryRouter);
 router.use('/blogs', blogRouter);
 router.use('/upload', uploadRouter);
+router.use('/inquiries', inquiryRouter);
 
 export default router;
