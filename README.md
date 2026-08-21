@@ -1,94 +1,120 @@
-# Team Task Tracker API (SDE-II Assignment) 🐳
+# Khodal Cab Backend API 🚕
 
-This is a production-ready REST API for a team-based task tracker system with role-based access control, security encryptions, Winston logs, Redis caching, and containerized deployment.
+A production-ready REST API backend for **Khodal Cab** built with Node.js, Express, TypeScript, Prisma ORM, and PostgreSQL.
 
 ---
 
-## 🚀 Setup & Installation (One-Command Start)
+## 🚀 Key Features
 
-You only need **Docker Desktop** installed to start the entire system (including PostgreSQL and Redis).
+* **Admin Authentication & Token Management**: JWT authentication with refresh tokens and bcrypt password hashing.
+* **Vehicle Fleet Management**: CRUD operations for cars, SUVs, tempos, and seating configurations.
+* **Cab Plans & Route Packages**: Management of city-to-city routes, pricing, and driver inclusions.
+* **Tour Packages**: Curated holiday itineraries with duration, route stops, and pricing.
+* **Inquiry & Booking Lead System**: Full lifecycle inquiry management with status workflows, follow-up dates, and internal admin notes.
+* **Blog & Travel Guides**: Content management system for articles with slugs and tags.
+* **Image Gallery & File Uploads**: Media management with Multer static storage.
 
-### 1. Run the system
-In your terminal inside the project directory, run:
+---
+
+## 🛠️ Tech Stack
+
+* **Runtime**: Node.js & TypeScript
+* **Framework**: Express 5
+* **ORM & Database**: Prisma ORM with PostgreSQL
+* **Security & Auth**: JWT, bcrypt, helmet, cors
+* **File Uploads**: Multer
+* **Logging**: Morgan & Winston
+
+---
+
+## 📦 Setup & Installation
+
+### 1. Install Dependencies
 ```bash
-docker compose up --build
+npm install
 ```
-*This downloads PostgreSQL, Redis, builds the Node.js application, and boots them up connected under a private network.*
 
-### 2. Generate Database Tables (First-time setup only)
-Open a **new terminal window** in the same directory and execute:
+### 2. Configure Environment Variables
+Create a `.env` file in the root directory:
+```env
+PORT=9000
+DATABASE_URL="postgresql://username:password@localhost:5432/khodal_cab_db?schema=public"
+JWT_SECRET="your_jwt_secret_key"
+```
+
+### 3. Setup Database Schema
 ```bash
-docker compose exec app npx prisma db push
+# Push Prisma schema to PostgreSQL
+npx prisma db push
+
+# (Optional) Seed initial data
+npx tsx prisma/seed.ts
 ```
-*This pushes our relational database schema and SDE-II indexes directly into the running PostgreSQL container.*
 
-### 3. Bootstrap your initial Admin User
-To register your very first `ADMIN` user, send a POST request using Postman to:
-* **Endpoint**: `POST http://localhost:9000/api/v1/auth/bootstrap-admin`
-* **Body (JSON)**:
-  ```json
-  {
-    "email": "admin@gmail.com",
-    "password": "secureadminpass",
-    "role": "ADMIN",
-    "organizationName": "Acme Corp"
-  }
-  ```
+### 4. Start Development Server
+```bash
+npm run dev
+```
+The API server will run at `http://localhost:9000/api/v1`.
 
 ---
 
-## 🔑 Security & Authorization Structure
+## 📑 API Endpoints Reference
 
-This application enforces strict role-based access control (RBAC) at the middleware level in `src/middlewares/auth.js`:
-* **`ADMIN`**: Full permissions across the organization (creates Projects, Tasks, and registers new Users).
-* **`MANAGER`**: Manages tasks, projects, and assigns members. Cannot manage/register users.
-* **`MEMBER`**: Can only view and update tasks specifically assigned to them.
-* **JWT Refresh Token Rotation (RTR):** Protects against session replay hijacking. The database stores active refresh tokens. When the user requests a new access token, the system validates the refresh token, deletes it, and issues a brand-new rotated pair.
+### 1. Health Check
+* `GET /api/v1/health` - Server health status
 
----
+### 2. Admin Authentication (`/api/v1/admin`)
+* `POST /api/v1/admin/login` - Admin login (returns tokens & cookie)
+* `POST /api/v1/admin/refresh` - Refresh access token
+* `POST /api/v1/admin/logout` - Logout & revoke refresh token
+* `GET /api/v1/admin/me` - Get logged-in admin profile
+* `GET /api/v1/admin/list` - List all admins (Admin only)
+* `POST /api/v1/admin/create` - Create a new admin (Admin only)
+* `DELETE /api/v1/admin/:id` - Delete admin (Admin only)
 
-## ⚡ Caching Strategy & Invalidation
+### 3. Vehicles (`/api/v1/vehicles`)
+* `GET /api/v1/vehicles` - List active vehicles (Public)
+* `GET /api/v1/vehicles/admin/list` - List all vehicles (Admin)
+* `POST /api/v1/vehicles` - Create vehicle (Admin)
+* `PATCH /api/v1/vehicles/:id` - Update vehicle (Admin)
+* `DELETE /api/v1/vehicles/:id` - Delete vehicle (Admin)
 
-To maintain optimal response times, we implement **Redis caching** in `src/config/redis.js` and `src/controllers/taskController.js`:
-1. **Assignee Caching**: Task lists queried per assignee are cached under the key `tasks:assignee:<assigneeId>`.
-2. **Active Invalidation**: Whenever a Task is created, updated (status, assignee, priority), or deleted, the server identifies the assignee and immediately invalidates their specific cache key. This ensures data is always kept consistent and up-to-date while avoiding stale responses.
+### 4. Cab Plans (`/api/v1/cab-plans`)
+* `GET /api/v1/cab-plans` - List active cab plans (Public)
+* `GET /api/v1/cab-plans/admin/list` - List all cab plans (Admin)
+* `POST /api/v1/cab-plans` - Create cab plan (Admin)
+* `PATCH /api/v1/cab-plans/:id` - Update cab plan (Admin)
+* `DELETE /api/v1/cab-plans/:id` - Delete cab plan (Admin)
 
----
+### 5. Tour Plans (`/api/v1/tour-plans`)
+* `GET /api/v1/tour-plans` - List active tour plans (Public)
+* `GET /api/v1/tour-plans/admin/list` - List all tour plans (Admin)
+* `POST /api/v1/tour-plans` - Create tour plan (Admin)
+* `PATCH /api/v1/tour-plans/:id` - Update tour plan (Admin)
+* `DELETE /api/v1/tour-plans/:id` - Delete tour plan (Admin)
 
-## 📊 Database Design Decisions & Indexing
+### 6. Inquiries & Contact (`/api/v1/inquiries`)
+* `POST /api/v1/inquiries` - Submit customer inquiry (Public)
+* `GET /api/v1/inquiries/admin/list` - Filtered inquiry list with pagination (Admin)
+* `GET /api/v1/inquiries/admin/stats` - Inquiry metrics & KPIs (Admin)
+* `GET /api/v1/inquiries/admin/:id` - Get inquiry details (Admin)
+* `PATCH /api/v1/inquiries/admin/:id` - Update inquiry status, follow-up, admin notes (Admin)
+* `DELETE /api/v1/inquiries/admin/:id` - Delete inquiry (Admin)
 
-To meet high-performance standards, we placed index locks on frequently queried fields in our `Task` model:
-* **`status`**: Critical since task boards fetch cards matching distinct statuses (e.g. `TODO`, `IN_PROGRESS`).
-* **`assigneeId`**: Speeds up user dashboard page loads which fetch tasks specific to the logged-in user.
-* **`due_date`**: Crucial for calculating overdue tasks efficiently during analytics aggregates without triggering costly full-table scans.
+### 7. Blogs (`/api/v1/blogs`)
+* `GET /api/v1/blogs` - List published blogs (Public)
+* `GET /api/v1/blogs/:slug` - Get blog by slug (Public)
+* `GET /api/v1/blogs/admin/list` - List all blogs (Admin)
+* `POST /api/v1/blogs` - Create blog post (Admin)
+* `PATCH /api/v1/blogs/:id` - Update blog post (Admin)
+* `DELETE /api/v1/blogs/:id` - Delete blog post (Admin)
 
----
+### 8. Gallery (`/api/v1/gallery`)
+* `GET /api/v1/gallery` - List gallery images (Public)
+* `GET /api/v1/gallery/admin/list` - List all gallery items (Admin)
+* `POST /api/v1/gallery` - Add image to gallery (Admin)
+* `DELETE /api/v1/gallery/:id` - Remove image from gallery (Admin)
 
-## 💾 Manual PostgreSQL Table Creation (PGAdmin Option)
-
-If you prefer to create tables manually inside PGAdmin rather than letting Prisma sync it, open the **Query Tool** inside PGAdmin and execute the script found in:
-👉 **[schema.sql](file:///d:/vs%20code/github/task-manager-BE/schema.sql)**
-
----
-
-## 📡 Server-Sent Events (SSE) Real-Time Streams
-
-To build an event-driven architecture with zero extra dependencies, we leverage native HTTP **Server-Sent Events (SSE)** under:
-* **`GET /api/v1/notifications/stream`** (Protected)
-* Connects a persistent HTTP channel. Users receive instant notifications when:
-  - Their assigned task status is changed.
-  - They are `@mentioned` in task comments (e.g. writing a comment `@john welcome!` immediately pushes an SSE notification to user `john`).
-
----
-
-## 📈 SDE-II Analytics Aggregate
-
-* **`GET /api/v1/analytics/tasks`** (Admin Only):
-  - Fetches total overdue task counts grouped per user.
-  - Fetches the average completion time (in hours) calculated from completed tasks (`completedAt - createdAt`) using raw SQL aggregates.
-
----
-
-## 🔮 What I Would Improve Given More Time
-1. **Dynamic Permission Mapping:** Move from simple hardcoded role checks to a database table storing dynamic permissions per role.
-2. **Rate Limiting Whitelist:** Configure dynamic rate-limit thresholds for VIP users vs. public callers.
+### 9. File Uploads (`/api/v1/upload`)
+* `POST /api/v1/upload` - Upload image file (Admin)

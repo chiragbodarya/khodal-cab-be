@@ -1,7 +1,7 @@
 {
-  "name": "task-manager-be",
+  "name": "khodal-cab-be",
   "version": "1.0.0",
-  "description": "",
+  "description": "Khodal Cab Backend API & Management System",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -11,18 +11,16 @@
     "format": "npx prettier --write \"src/**/*.{ts,js,json}\" \"*.{json,js,ts}\"",
     "format:check": "npx prettier --check \"src/**/*.{ts,js,json}\" \"*.{json,js,ts}\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/chiragbodarya/task-manager-BE.git"
-  },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "khodal-cab",
+    "cab-booking",
+    "taxi-service",
+    "express",
+    "prisma"
+  ],
+  "author": "Chirag Bodarya",
   "license": "ISC",
   "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/chiragbodarya/task-manager-BE/issues"
-  },
-  "homepage": "https://github.com/chiragbodarya/task-manager-BE#readme",
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "bcrypt": "^6.0.0",

@@ -1,5 +1,5 @@
 -- =========================================================================
--- TRAVEL COMPANY SYSTEM SCHEMA DEFINITION (POSTGRESQL)
+-- KHODAL CAB SYSTEM SCHEMA DEFINITION (POSTGRESQL)
 -- =========================================================================
 
 -- 1. Create Admin Table

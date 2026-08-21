@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretjwtkey12345';
-const JWT_EXPIRES_IN = '1h'; // Let's make it 1h for convenience in travel app admin panel, or keep it short
+const JWT_EXPIRES_IN = '1h'; // 1h expiration for Khodal Cab admin panel access tokens
 
 const generateAccessToken = (user: any) => {
   return jwt.sign(
