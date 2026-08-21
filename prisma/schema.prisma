@@ -35,10 +35,11 @@ model Vehicle {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   cabPlans     CabPlan[]
+  inquiries    Inquiry[]
 }
 
 model CabPlan {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   packageName        String
   packageDescription String?
   days               Int
@@ -50,14 +51,15 @@ model CabPlan {
   driverFoodIncluded Boolean  @default(false)
   image              String?  // Single image URL
   vehicleId          Int?
-  vehicle            Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  vehicle            Vehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  inquiries          Inquiry[]
 }
 
 model TourPlan {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   packageName        String
   packageDescription String?
   days               Int
@@ -68,9 +70,10 @@ model TourPlan {
   startDate          DateTime?
   endDate            DateTime?
   image              String?  // Single image URL
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  inquiries          Inquiry[]
 }
 
 model Gallery {
@@ -96,3 +99,84 @@ model Blog {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
+
+model CabModel {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  capacity    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Route {
+  id           Int      @id @default(autoincrement())
+  fromLocation String
+  toLocation   String
+  isSpecial    Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  serviceName String   @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum InquiryType {
+  CONTACT_US
+  VEHICLE
+  TOUR_PLAN
+  CAB_PLAN
+}
+
+enum InquiryStatus {
+  NEW
+  IN_PROGRESS
+  CALL_BACK_REQUESTED
+  CONFIRMED
+  RESOLVED
+  CANCELLED
+}
+
+model Inquiry {
+  id              Int            @id @default(autoincrement())
+  type            InquiryType    @default(CONTACT_US)
+  status          InquiryStatus  @default(NEW)
+  
+  // Customer Details
+  name            String
+  email           String?
+  phone           String
+  message         String?
+  
+  // Trip Details (Optional)
+  pickupLocation  String?
+  dropLocation    String?
+  travelDate      DateTime?
+  returnDate      DateTime?
+  passengers      Int?
+
+  // Relations (Optional)
+  vehicleId       Int?
+  vehicle         Vehicle?       @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  cabPlanId       Int?
+  cabPlan         CabPlan?       @relation(fields: [cabPlanId], references: [id], onDelete: SetNull)
+  tourPlanId      Int?
+  tourPlan        TourPlan?      @relation(fields: [tourPlanId], references: [id], onDelete: SetNull)
+
+  // Admin Management & Follow-up
+  followUpDate    DateTime?
+  adminNotes      String?
+  isWorkedOn      Boolean        @default(false)
+  lastContactedAt DateTime?
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
